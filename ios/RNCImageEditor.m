@@ -83,20 +83,28 @@ RCT_EXPORT_METHOD(cropImage:(NSURLRequest *)imageRequest
       path = [RNCFileSystem generatePathInDirectory:[[RNCFileSystem cacheDirectoryPath] stringByAppendingPathComponent:@"ReactNative_cropped_image_"] withExtension:@".png"];
     }
     else{
-
       imageData = UIImageJPEGRepresentation(croppedImage, 1);
       path = [RNCFileSystem generatePathInDirectory:[[RNCFileSystem cacheDirectoryPath] stringByAppendingPathComponent:@"ReactNative_cropped_image_"] withExtension:@".jpg"];
     }
 
     NSError *writeError;
     NSString *uri = [RNCImageUtils writeImage:imageData toPath:path error:&writeError];
-      
     if (writeError != nil) {
       reject(@(writeError.code).stringValue, writeError.description, writeError);
       return;
     }
-      
-    resolve(uri);
+
+    NSString *encodedString = [imageData base64EncodedStringWithOptions:NSDataBase64EncodingEndLineWithLineFeed];
+    NSDictionary *dict = @{@"uri" : uri, @"base64" : encodedString};
+    NSError * err;
+    NSData * jsonData = [NSJSONSerialization dataWithJSONObject:dict options:0 error:&err];
+    if (!jsonData) {
+      NSString *errorMessage = @"Error storing cropped image in RCTImageStoreManager";
+      reject(RCTErrorWithMessage(errorMessage));
+    } else {
+      NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+      resolve(@[jsonString]);
+    }
   }];
 }
 

@@ -45,7 +45,7 @@ declare class ImageEditor {
    * cropped image from the cache path when you are done with it.
    */
   static cropImage: (
-    uri: string,
+    data: string,
     cropData: ImageCropData,
   ) => Promise<string>
 }

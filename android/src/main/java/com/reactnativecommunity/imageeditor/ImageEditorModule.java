@@ -281,8 +281,13 @@ public class ImageEditorModule extends ReactContextBaseJavaModule {
         if (mimeType.equals("image/jpeg")) {
           copyExif(mContext, Uri.parse(mUri), tempFile);
         }
-
-        mPromise.resolve(Uri.fromFile(tempFile).toString());
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        cropped.compress(Bitmap.CompressFormat.JPEG,100,baos);
+        byte[] b = baos.toByteArray();
+        JSONObject obj = new JSONObject();
+        obj.put("uri", Uri.fromFile(tempFile).toString());
+        obj.put("base64", Base64.encodeToString(b, Base64.DEFAULT));
+        mPromise.resolve((obj.toString());
       } catch (Exception e) {
         mPromise.reject(e);
       }
